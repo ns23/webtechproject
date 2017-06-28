@@ -1,0 +1,78 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class My_account extends CI_Controller {
+
+	public function index($value=0)
+	{
+		//check if the session is set else redirect user to login page
+		if($this->session->userdata('uid'))
+		{
+			if ($value==1) {
+				$this->load->view('navbar');
+				$this->load->view('sidebar');
+
+			}
+			
+			$this->load->view('my_account_view');
+		}
+		else
+		{
+			$this->session->set_flashdata('message', 'Login first to access account!!!');	
+			redirect(base_url().'index.php/home/loginpage','refresh');
+		}
+	}
+
+
+	public function my_profile($value='')
+	{
+		#displays option to edit profile
+		$this->load->view('my_profile_view');
+
+	}
+
+	public function inbox($value=0)
+	{
+		
+		if ($value==1) {
+			# code...
+			$this->load->view('navbar');
+			$this->load->view('sidebar');
+
+		}
+		
+		$this->load->model('view_message_model');
+		$data['h'] = $this->view_message_model->view();
+		$this->load->view('inbox_view',$data);
+	}
+
+	public function my_pic($value=0)
+	{
+		# code...
+		// load profile pic from here and also option to display profile pic
+		if ($value==1) {
+			# code...
+			$this->load->view('navbar');
+			$this->load->view('sidebar');
+
+		}
+
+		$this->load->model('my_profile_view');
+
+
+
+
+	}
+
+
+
+	
+
+
+	
+
+
+}
+
+/* End of file my_account.php */
+/* Location: ./application/controllers/my_account.php */

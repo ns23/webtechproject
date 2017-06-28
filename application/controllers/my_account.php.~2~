@@ -1,0 +1,300 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class My_account extends CI_Controller {
+
+	public function index($value=0)
+	{
+		//check if the session is set else redirect user to login page
+		if($this->session->userdata('uid'))
+		{
+			if ($value==1) {
+				$this->load->view('navbar');
+				$this->load->view('sidebar');
+
+			}
+			
+			$this->load->view('my_account_view');
+			
+			if ($value==1) {
+				$this->load->view('footer');
+				
+
+			}
+		}
+		else
+		{
+			$this->session->set_flashdata('message', 'Login first to access account!!!');	
+			redirect(base_url().'index.php/home/loginpage','refresh');
+		}
+	}
+
+
+	public function my_profile($value='')
+	{
+		#displays option to edit profile
+		$this->load->view('my_profile_view');
+
+	}
+
+	 // public function listing($value='')
+  //       {
+  //       	$this->load->view('navbar');
+  //       	$this->load->view('list_view');
+  //       }
+
+
+	public function about_yourself($value=0)
+	{
+		#display form to write abour yourself
+
+		$this->load->model('about_yourself_model');
+		$this->about_yourself_model->getdata();
+
+		if(isset($_POST['abt_yourself']) )
+		{
+			$data = $this->input->post('abt_yourself');
+			if ($this->session->userdata('key')==1) {
+				#update data
+				$res = $this->about_yourself_model->updatedata($data);
+			
+			} else {
+				# insert data
+				$res = $this->about_yourself_model->insertdata($data);
+			}
+
+			if ($res == true) {
+				# qury got executed successfully
+				$this->session->set_flashdata('message', 'Information about you is updated');
+
+			} else {
+				# code...
+				$this->session->set_flashdata('message', 'Unknown error try again!');
+			}
+			
+			
+			
+
+			redirect(base_url().'index.php/my_account/index/1','refresh');
+		
+		}else
+		{
+		
+		$this->load->view('about_yourself_view');
+		}
+	
+
+	}
+
+	#interest controller
+
+	public function interest($value='')
+	{
+		# code...
+
+		$this->load->model('interest_model');
+		$this->interest_model->getdata();
+		if(isset($_POST['interest']) )
+		{
+			$data = $this->input->post('interest');
+			if ($this->session->userdata('key')==1) {
+				#update data
+				$res = $this->interest_model->updatedata($data);
+			
+			} else {
+				# insert data
+				$res = $this->interest_model->insertdata($data);
+			}
+
+			if ($res == true) {
+				# qury got executed successfully
+				$this->session->set_flashdata('message', 'Information Interest is updated');
+
+			} else {
+				# code...
+				$this->session->set_flashdata('message', 'Unknown error try again!');
+			}
+			
+			
+			
+
+			redirect(base_url().'index.php/my_account/index/1','refresh');
+		
+		}else
+		{
+		
+		$this->load->view('interest_view');
+		}
+
+
+
+		
+	}
+
+	public function update_profile()
+	{
+
+if($this->input->post('password'))
+			{
+
+			$first_name=$this->input->post('first_name');
+			$last_name=$this->input->post('last_name');
+ 			
+		
+
+			$data = array
+			(
+			'first_name'   => $first_name,
+			'last_name'   => $last_name,
+			'password'   => md5($this->input->post('password')),
+			);
+ 
+		 $this->load->model('my_account_model');
+ 		 $result=$this->my_account_model->with_password($data);
+			}
+			else
+
+			{
+			$first_name=$this->input->post('first_name');
+			$last_name=$this->input->post('last_name');
+
+			$data = array
+			(
+			'first_name'   => $first_name,
+			'last_name'   => $last_name,
+			);
+ 
+		$this->load->model('my_account_model');
+ 		 $result=$this->my_account_model->without_password($data);
+ 		
+
+ 		}
+ 		redirect('my_account');
+	
+
+
+
+
+	}
+
+
+
+
+
+
+
+
+	public function inbox($value=0)
+	{
+		
+		if ($value==1) {
+			# code...
+			$this->load->view('navbar');
+			$this->load->view('sidebar');
+
+		}
+		
+		$this->load->model('view_message_model');
+		$data['h'] = $this->view_message_model->view();
+		$this->load->view('inbox_view',$data);
+	}
+
+	public function my_pic($value=0)
+	{
+		if ($value==1) {
+			# code...
+			$this->load->view('navbar');
+			$this->load->view('sidebar');
+
+		}
+		
+		$this->load->model('profile_pic_model');
+		$result = $this->profile_pic_model->get_profile_pic();
+		$path = base_url().$result;
+		$data = array('path' =>$path);
+		$this->load->view('my_pic_view', $data);	
+
+		
+	}
+
+	// update profile pic code
+
+	public function updateProfile()
+	{
+		$path="upload/profile";
+		$result1=$this->do_upload($this->input->post('userfile'),$path);
+
+		if($result1==TRUE)
+		{
+
+		
+				 $data=array(
+				
+				'profile' =>'upload/profile/'.$this->upload->data('file_name')
+				);
+				//$profile_pic = $this->upload->data('file_name');
+				//print_r($data);
+			
+		
+			$this->load->model('profile_pic_model');
+			$result=$this->profile_pic_model->update_profile_pic($data);
+
+			if($result==TRUE)
+			 {
+				redirect(base_url().'index.php/my_account/my_pic/1','refresh');
+				
+			 }
+		
+		}
+		else{
+			/*
+			
+			PRINT ERROR MESSAGE 
+
+			*/
+		}
+	}
+
+
+	public function do_upload($data,$path)
+        {
+        	//	echo $data;
+
+		$user_id = $this->session->userdata('uid');
+		//print_r($user_id);
+
+        		$config['allowed_types']        = 'gif|jpg|png';
+                $config['file_name']             = $user_id;
+                $config['overwrite']			= true;
+                $config['upload_path']          = $path;
+                
+                //$config['max_width']            = 1024;
+                //$config['max_height']           = 768;
+
+                $this->load->library('upload', $config);
+
+                if ( ! $this->upload->do_upload('userfile'))
+                {
+                        $error = array('error' => $this->upload->display_errors());
+                        return $error;
+                }
+                else
+                {
+                      return TRUE;
+                }
+        }
+
+       
+
+
+
+	
+
+
+	
+
+
+}
+
+/* End of file my_account.php */
+/* Location: ./application/controllers/my_account.php */
