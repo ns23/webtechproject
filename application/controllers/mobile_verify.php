@@ -73,7 +73,7 @@ class Mobile_verify extends CI_Controller {
 		// Authorisation details.
 		
 		$username = "niteshsawant023@gmail.com";
-		$hash = "e9ebdbf366d55514f43f4366ea1ab13da5e55930";
+		$hash = "";
 
 		// Config variables. Consult http://api.textlocal.in/docs for more info.
 		$test = "0";
